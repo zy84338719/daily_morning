@@ -1,10 +1,11 @@
-from datetime import date, datetime
 import math
-from wechatpy import WeChatClient
-from wechatpy.client.api import WeChatMessage, WeChatTemplate
-import requests
-import os
 import random
+from datetime import date, datetime
+
+import os
+import requests
+from wechatpy import WeChatClient
+from wechatpy.client.api import WeChatMessage
 
 today = datetime.now()
 start_date = os.environ['START_DATE']
@@ -17,37 +18,63 @@ app_secret = os.environ["APP_SECRET"]
 user_id = os.environ["USER_ID"]
 template_id = os.environ["TEMPLATE_ID"]
 
-
 def get_weather():
-  url = "http://autodev.openspeech.cn/csp/api/v2.1/weather?openId=aiuicus&clientType=android&sign=android&city=" + city
-  res = requests.get(url).json()
-  weather = res['data']['list'][0]
-  return weather['weather'], math.floor(weather['temp'])
+    url = "http://autodev.openspeech.cn/csp/api/v2.1/weather?openId=aiuicus&clientType=android&sign=android&city=" + city
+    res = requests.get(url).json()
+    weather = res['data']['list'][0]
+    return weather['weather'], math.floor(weather['temp'])
+
 
 def get_count():
-  delta = today - datetime.strptime(start_date, "%Y-%m-%d")
-  return delta.days
+    delta = today - datetime.strptime(start_date, "%Y-%m-%d")
+    return delta.days
+
 
 def get_birthday():
-  next = datetime.strptime(str(date.today().year) + "-" + birthday, "%Y-%m-%d")
-  if next < datetime.now():
-    next = next.replace(year=next.year + 1)
-  return (next - today).days
+    next = datetime.strptime(str(date.today().year) + "-" + birthday, "%Y-%m-%d")
+    if next < datetime.now():
+        next = next.replace(year=next.year + 1)
+    return (next - today).days
+
 
 def get_words():
-  words = requests.get("https://api.shadiao.pro/chp")
-  if words.status_code != 200:
-    return get_words()
-  return words.json()['data']['text']
+    words = requests.get("https://api.shadiao.pro/chp")
+    if words.status_code != 200:
+        return get_words()
+    return words.json()['data']['text']
+
+
+def get_dna():
+    today = datetime.today()
+    weekday = today.date().weekday()
+    if weekday == 5:
+        return "2"
+    if weekday == 6:
+        return "1"
+    if weekday % 2 == 0:
+        return "今日需要核酸 0"
+    return weekday % 2
+
 
 def get_random_color():
-  return "#%06x" % random.randint(0, 0xFFFFFF)
+    return "#%06x" % random.randint(0, 0xFFFFFF)
 
 
 client = WeChatClient(app_id, app_secret)
 
 wm = WeChatMessage(client)
 wea, temperature = get_weather()
-data = {"weather":{"value":wea},"temperature":{"value":temperature},"love_days":{"value":get_count()},"birthday_left":{"value":get_birthday()},"words":{"value":get_words(), "color":get_random_color()}}
-res = wm.send_template(user_id, template_id, data)
-print(res)
+data = {
+    "weather": {"value": wea},
+    "temperature": {"value": temperature},
+    "know": {"value": get_count()},
+    "birthday_left": {"value": get_birthday()},
+    "dna": {"value": get_dna()},
+    "word": {"value": get_words(), "color": get_random_color()}
+}
+print(data)
+
+for i in user_id.split("," ):
+    res = wm.send_template(i, template_id, data)
+    print(res)
+
