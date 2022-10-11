@@ -1,8 +1,8 @@
 import math
+import os
 import random
 from datetime import date, datetime
 
-import os
 import requests
 from dateutil import tz
 from wechatpy import WeChatClient
@@ -13,6 +13,7 @@ def get_today():
     tzinfo = tz.gettz('Asina/Shanghai')
     day = datetime.now()
     day.replace(tzinfo=tzinfo)
+    print("当前时间为 ", day)
     return day
 
 
