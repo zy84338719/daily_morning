@@ -4,10 +4,20 @@ from datetime import date, datetime
 
 import os
 import requests
+from dateutil import tz
 from wechatpy import WeChatClient
 from wechatpy.client.api import WeChatMessage
 
-today = datetime.now()
+
+def get_today():
+    tzinfo = tz.gettz('Asina/Shanghai')
+    day = datetime.now()
+    day.replace(tzinfo=tzinfo)
+    return day
+
+
+today = get_today()
+
 start_date = os.environ['START_DATE']
 city = os.environ['CITY']
 birthday = os.environ['BIRTHDAY']
@@ -17,6 +27,7 @@ app_secret = os.environ["APP_SECRET"]
 
 user_id = os.environ["USER_ID"]
 template_id = os.environ["TEMPLATE_ID"]
+
 
 def get_weather():
     url = "http://autodev.openspeech.cn/csp/api/v2.1/weather?openId=aiuicus&clientType=android&sign=android&city=" + city
@@ -45,7 +56,6 @@ def get_words():
 
 
 def get_dna():
-    today = datetime.today()
     weekday = today.date().weekday()
     if weekday == 5:
         return "2"
@@ -74,7 +84,6 @@ data = {
 }
 print(data)
 
-for i in user_id.split("," ):
+for i in user_id.split(","):
     res = wm.send_template(i, template_id, data)
     print(res)
-
