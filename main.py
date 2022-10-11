@@ -1,7 +1,7 @@
 import math
 import os
 import random
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
 import requests
 from dateutil import tz
@@ -13,6 +13,7 @@ def get_today():
     tzinfo = tz.gettz('Asina/Shanghai')
     day = datetime.now()
     day.replace(tzinfo=tzinfo)
+    day = day + timedelta(hours=8)
     print("当前时间为 ", day)
     return day
 
